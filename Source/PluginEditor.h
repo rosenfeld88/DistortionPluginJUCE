@@ -25,20 +25,15 @@ public:
     //==============================================================================
     void paint (Graphics&) override;
     void resized() override;
-    //String getClipFxn() override;
 
 private:
     
-//    ScopedPointer<Slider> driveKnob;
-//    ScopedPointer<Slider> rangeKnob;
     ScopedPointer<Slider> gainKnob;
     ScopedPointer<Slider> blendKnob;
     ScopedPointer<Slider> volumeKnob;
     ScopedPointer<Slider> toneKnob;
     ScopedPointer<ComboBox> clipFxnSelect;
     
-//    ScopedPointer<AudioProcessorValueTreeState::SliderAttachment> driveAttachment;
-//    ScopedPointer<AudioProcessorValueTreeState::SliderAttachment> rangeAttachment;
     ScopedPointer<AudioProcessorValueTreeState::SliderAttachment> gainAttachment;
     ScopedPointer<AudioProcessorValueTreeState::SliderAttachment> blendAttachment;
     ScopedPointer<AudioProcessorValueTreeState::SliderAttachment> volumeAttachment;

@@ -30,23 +30,22 @@ DistortionAudioProcessor::DistortionAudioProcessor()
 {
     state = new AudioProcessorValueTreeState(*this, nullptr);
     
-//    state->createAndAddParameter("drive", "Drive", "Drive", NormalisableRange<float>(0.f, 1.f, 0.0001), 1.f, nullptr, nullptr);
-//
-//    state->createAndAddParameter("range", "Range", "Range", NormalisableRange<float>(0.f, 3000.f, 0.0001), 1.f, nullptr, nullptr);
-    
+    // Gain Parameter
     state->createAndAddParameter("gain", "Gain", "Gain", NormalisableRange<float>(0.f, 3000.f, 0.0001), 10.f, nullptr, nullptr);
     
+    // Blend Parameter
     state->createAndAddParameter("blend", "Blend", "Blend", NormalisableRange<float>(0.f, 1.f, 0.0001), 1.f, nullptr, nullptr);
     
+    // Volume Parameter
     state->createAndAddParameter("volume", "Volume", "Volume", NormalisableRange<float>(0.f, 10.f, 0.0001), 1.f, nullptr, nullptr);
     
+    // Tone Parameter (cutoff frequency)
     state->createAndAddParameter("tone", "Tone", "Tone", NormalisableRange<float>(1000.f, 20000.f, 1.f), 20000.f, nullptr, nullptr);
     
+    // Clipping Function Selection
     state->createAndAddParameter("clip", "Clip Type", "Clip Type", NormalisableRange<float>(1.f, 3.f, 1.f), 3.f, nullptr, nullptr);
     
-    
-//    state->state = ValueTree("drive");
-//    state->state = ValueTree("range");
+    // Add Parameters to ValueTree
     state->state = ValueTree("gain");
     state->state = ValueTree("blend");
     state->state = ValueTree("volume");
@@ -127,13 +126,14 @@ void DistortionAudioProcessor::changeProgramName (int index, const String& newNa
 //==============================================================================
 void DistortionAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
-    // Use this method as the place to do any pre-playback
-    // initialisation that you need..
+    
+    // Creates the JUCE DSP module process spec.
     dsp::ProcessSpec spec;
     spec.sampleRate = sampleRate;
     spec.maximumBlockSize = samplesPerBlock;
     spec.numChannels = getTotalNumInputChannels();
     
+    // LPF initializations.
     lowPassFilter.prepare(spec);
     lowPassFilter.reset();
 }
@@ -168,6 +168,10 @@ bool DistortionAudioProcessor::isBusesLayoutSupported (const BusesLayout& layout
 }
 #endif
 
+/*
+ * Main processing function. Performs sample-wise operations for main distortion effect.
+ * Lowpass tone filter applied after distortion processing.
+ */
 void DistortionAudioProcessor::processBlock (AudioBuffer<float>& buffer, MidiBuffer& midiMessages)
 {
     ScopedNoDenormals noDenormals;
@@ -176,15 +180,12 @@ void DistortionAudioProcessor::processBlock (AudioBuffer<float>& buffer, MidiBuf
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear (i, 0, buffer.getNumSamples());
     
-    dsp::AudioBlock<float> block(buffer);
-//    float drive = *state->getRawParameterValue("drive");
-//    float range = *state->getRawParameterValue("range");
-    float gain = *state->getRawParameterValue("gain");
-    float blend = *state->getRawParameterValue("blend");
-    float volume = *state->getRawParameterValue("volume");
-    //float hard_thresh = 0.75f;
-    int clipFxn = (int) *state->getRawParameterValue("clip");
-    std::cout << clipFxn;
+    float gain = *state->getRawParameterValue("gain"); // Get current gain value.
+    float blend = *state->getRawParameterValue("blend"); // Get current blend value.
+    float volume = *state->getRawParameterValue("volume"); // get current volume value.
+    int clipFxn = (int) *state->getRawParameterValue("clip"); // Get clipping function selection
+    
+    // Gain/Distortion processing (sample-wise)
     for (int channel = 0; channel < totalNumInputChannels; ++channel)
     {
         auto* channelData = buffer.getWritePointer (channel);
@@ -208,6 +209,9 @@ void DistortionAudioProcessor::processBlock (AudioBuffer<float>& buffer, MidiBuf
             channelData++;
         }
     }
+    
+    // Filtering
+    dsp::AudioBlock<float> block(buffer);
     updateParameters();
     lowPassFilter.process(dsp::ProcessContextReplacing<float> (block));
 }
@@ -216,6 +220,9 @@ AudioProcessorValueTreeState& DistortionAudioProcessor::getState(){
     return *state;
 }
 
+/*
+ * Updates the lowpass filter according to the current cutoff frequency value.
+ */
 void DistortionAudioProcessor::updateParameters(){
     float cutoff = *state->getRawParameterValue("tone");
     *lowPassFilter.state = *dsp::IIR::Coefficients<float>::makeLowPass(getSampleRate(), cutoff, 0.1f);

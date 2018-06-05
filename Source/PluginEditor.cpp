@@ -16,14 +16,6 @@ DistortionAudioProcessorEditor::DistortionAudioProcessorEditor (DistortionAudioP
     : AudioProcessorEditor (&p), processor (p)
 {
     
-//    addAndMakeVisible(driveKnob = new Slider("Drive"));
-//    driveKnob->setSliderStyle(Slider::Rotary);
-//    driveKnob->setTextBoxStyle(Slider::NoTextBox, false, 100, 100);
-//
-//    addAndMakeVisible(rangeKnob = new Slider("Range"));
-//    rangeKnob->setSliderStyle(Slider::Rotary);
-//    rangeKnob->setTextBoxStyle(Slider::NoTextBox, false, 100, 100);
-    
     addAndMakeVisible(gainKnob = new Slider("Gain"));
     gainKnob->setSliderStyle(Slider::Rotary);
     gainKnob->setTextBoxStyle(Slider::NoTextBox, false, 100, 100);
@@ -44,10 +36,7 @@ DistortionAudioProcessorEditor::DistortionAudioProcessorEditor (DistortionAudioP
     clipFxnSelect->addItem("Arc Tan", 1);
     clipFxnSelect->addItem("Tanh", 2);
     clipFxnSelect->addItem("Soft-Max", 3);
-    //clipFxnSelect->setSelectedItemIndex(1);
     
-//    driveAttachment = new AudioProcessorValueTreeState::SliderAttachment(p.getState(), "drive", *driveKnob);
-//    rangeAttachment = new AudioProcessorValueTreeState::SliderAttachment(p.getState(), "range", *rangeKnob);
     gainAttachment = new AudioProcessorValueTreeState::SliderAttachment(p.getState(), "gain", *gainKnob);
     blendAttachment = new AudioProcessorValueTreeState::SliderAttachment(p.getState(), "blend", *blendKnob);
     volumeAttachment = new AudioProcessorValueTreeState::SliderAttachment(p.getState(), "volume", *volumeKnob);
@@ -63,21 +52,26 @@ DistortionAudioProcessorEditor::~DistortionAudioProcessorEditor()
 }
 
 //==============================================================================
+/*
+ * Graphics paint function. Mainly handles text labels.
+ */
 void DistortionAudioProcessorEditor::paint (Graphics& g)
 {
-    int paramsPerRow = 2;
-    int h_spacing = 25;
-    int v_spacing = 30;
-    int paramWidth = 100;
-    int knobHeight = 100;
-    int comboHeight = 25;
-    int pad = (getWidth() - ((paramsPerRow + 1) * paramWidth + 10) - (paramsPerRow * h_spacing)) / 2;
+    int paramsPerRow = 2; // Number of parameters per row (knobs arranged in a 2x2 square)
+    int h_spacing = 25; // Horizontal spacing between components
+    int v_spacing = 30; // Vertical spacing between components
+    int paramWidth = 100; // Control width
+    int knobHeight = 100; // Knob height
+    int comboHeight = 25; // Combo box height
+    int pad = (getWidth() - ((paramsPerRow + 1) * paramWidth + 10) - (paramsPerRow * h_spacing)) / 2; // Pad from left side
+    
     // (Our component is opaque, so we must completely fill the background with a solid colour)
     g.fillAll (getLookAndFeel().findColour (ResizableWindow::backgroundColourId));
 
     g.setColour (Colours::white);
     g.setFont (15.0f);
     
+    // Place text appropriately
     g.drawText("Gain", pad, (getHeight() - v_spacing - knobHeight) / 2, paramWidth, knobHeight, Justification::centred, false);
     g.drawText("Volume", pad + 1 * (paramWidth + h_spacing), (getHeight() - v_spacing - knobHeight) / 2, paramWidth, knobHeight, Justification::centred, false);
     g.drawText("Blend", pad, (getHeight() + knobHeight + v_spacing) / 2, paramWidth, knobHeight, Justification::centred, false);
@@ -89,14 +83,16 @@ void DistortionAudioProcessorEditor::resized()
 {
     // This is generally where you'll want to lay out the positions of any
     // subcomponents in your editor..
-    int paramsPerRow = 2;
-    int h_spacing = 25;
-    int v_spacing = 30;
-    int paramWidth = 100;
-    int knobHeight = 100;
-    int comboHeight = 25;
-    int pad = (getWidth() - ((paramsPerRow + 1) * paramWidth + 10) - (paramsPerRow * h_spacing)) / 2;
     
+    int paramsPerRow = 2; // Number of parameters per row (knobs arranged in a 2x2 square)
+    int h_spacing = 25; // Horizontal spacing between components
+    int v_spacing = 30; // Vertical spacing between components
+    int paramWidth = 100; // Control width
+    int knobHeight = 100; // Knob height
+    int comboHeight = 25; // Combo box height
+    int pad = (getWidth() - ((paramsPerRow + 1) * paramWidth + 10) - (paramsPerRow * h_spacing)) / 2; // Pad from left side
+    
+    // Place graphics components
     gainKnob->setBounds(pad, ((getHeight() - v_spacing) / 2) - knobHeight, paramWidth, knobHeight);
     volumeKnob->setBounds(pad + 1 * (paramWidth + h_spacing), ((getHeight() - v_spacing) / 2) - knobHeight, paramWidth, knobHeight);
     blendKnob->setBounds(pad, (getHeight() / 2) + (v_spacing / 2), paramWidth, knobHeight);
